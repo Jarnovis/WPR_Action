@@ -1,0 +1,37 @@
+# Use Ubuntu as a base image
+FROM ubuntu:20.04
+
+# Set the working directory
+WORKDIR /home/runner
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    sudo \
+    ca-certificates \
+    tar \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js (required by the GitHub Actions runner)
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && \
+    sudo apt-get install -y nodejs
+
+# Download the GitHub Actions runner
+RUN curl -o actions-runner-linux-x64-2.320.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.320.0/actions-runner-linux-x64-2.320.0.tar.gz
+
+# Extract the runner
+RUN tar xzf actions-runner-linux-x64-2.320.0.tar.gz
+
+# Set environment variable for GitHub Token
+ARG GITHUB_TOKEN
+ENV GITHUB_TOKEN=${AWYTX2TR4Z52CTPGSEAFU53HINNW6}
+
+# Configure the runner
+RUN ./config.sh --url https://github.com/YourUsername/YourRepo --token $GITHUB_TOKEN
+
+# Expose the necessary port for communication (optional)
+EXPOSE 8080
+
+# Start the runner
+CMD ["./run.sh"]
